@@ -1,1 +1,5 @@
-# ark-pzpi-23-8-khudiienko-mykyta
+ПЗПІ-23-8
+
+Худієнко Микита
+
+Pract1 - "Правила оформлення програмного коду JavaScript"
