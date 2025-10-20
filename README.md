@@ -2,6 +2,6 @@
 
 Худієнко Микита
 
-Тема ПЗ1 - "Правила оформлення програмного коду Airbnb JavaScript Style Guide"
+Правила оформлення програмного коду мови програмування JavaScript від компанії Airbnb
 
-Тема ПЗ2 - ""
+Методи рефакторинґу Replace Array with Object, Encapsulate Field, Replace Nested Conditional with Guard Clauses
