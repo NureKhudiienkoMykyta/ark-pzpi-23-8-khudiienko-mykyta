@@ -4,4 +4,4 @@
 
 Правила оформлення програмного коду мови програмування JavaScript від компанії Airbnb
 
-Методи рефакторинґу програмного коду Replace Array with Object, Encapsulate Field, Replace Nested Conditional with Guard Clauses на прикладі Node.js
+Методи рефакторинґу програмного коду Replace Array with Object, Replace Exception with Test, Replace Nested Conditional with Guard Clauses на прикладі Node.js
