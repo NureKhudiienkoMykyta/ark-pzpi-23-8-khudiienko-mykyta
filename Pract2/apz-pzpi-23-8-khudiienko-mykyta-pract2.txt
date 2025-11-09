@@ -1,0 +1,724 @@
+Харківський національний університет радіоелектроніки
+Факультет комп’ютерних наук
+Кафедра програмної інженерії
+
+
+
+
+
+
+
+
+
+
+ЗВІТ
+до практичного завдання № 2
+з дисципліни «Аналіз та рефакторинг коду»
+на тему: «Методи рефакторинґу програмного коду Replace Array with Object, Encapsulate Field, Replace Nested Conditional with Guard Clauses на прикладі Node.js»
+
+
+
+
+
+
+
+
+Виконав
+ст. гр. ПЗПІ-23-8
+Худієнко Микита
+
+
+Перевірив
+ст. викладач кафедри ПІ
+Сокорчук Ігор Петрович
+
+
+
+
+
+
+Харків 2025
+1 ІСТОРІЯ ЗМІН
+
+
+№
+	Дата
+	Версія звіту
+	Опис змін та виправлень
+	1
+	04.11.2025
+	0.1
+	Створено розділ «Завдання», «Опис Виконаної роботи», «Висновки», «Використані джерела», «Додаток В»
+	2
+	09.11.2025
+	0.2
+	Створено розділ «Додаток А», «Додаток Б»
+	
+
+
+
+________________
+
+
+2 ЗАВДАННЯ
+
+
+1. Вступ: методи рефакторингу та їх призначення
+2. Метод Replace Array with Object
+3. Метод Replace Exception with Test
+4. Метод Replace Nested Conditional with Guard Clauses
+5. Інструменти для рефакторингу
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+________________
+
+
+3 ОПИС ВИКОНАНОЇ РОБОТИ
+3.1 Вступ
+Рефакторинг дозволяє покращити структуру існуючого коду без зміни його зовнішньої поведінки. У цій доповіді розглядаються три методи рефакторингу програмного коду. Метод Replace Array with Object застосовується для перетворення масивів з індексованими даними на об'єкти з іменованими властивостями, що робить код самодокументованим. Метод Replace Exception with Test використовується для запобігання надмірного використання механізму винятків у випадках, коли можна заздалегідь перевірити можливість виникнення помилки.. Метод Replace Nested Conditional with Guard Clauses спрощує складні вкладені умови шляхом виділення всіх особливих випадків в окремі умовні оператори, які у випадках настання граничних умов будуть відразу закінчувати виконання і повертатимуть потрібне значення.
+
+
+3.2 Метод Replace Array with Object
+3.2.1 Опис проблеми 
+
+
+У початковій версії коду функції реєстрації користувача дані зберігаються у масиві userData, де кожен елемент має числовий індекс.
+Проблеми цього підходу:
+* Неможливо зрозуміти призначення userData[2] без коментарів або перегляду ініціалізації масиву;
+* Легко переплутати індекси (наприклад, використати userData[1] замість userData[2]);
+* При додаванні нових полів можна порушити існуючу індексацію;
+* При зміні порядку елементів у масиві потрібно оновлювати весь код;
+* Додавання нових полів ускладнює читання коду;
+* Неможливо використати сучасні можливості JavaScript (деструктуризація, spread-оператор);
+* Новим розробникам важко зрозуміти логіку без детального вивчення.
+
+
+Метод рефакторингу Replace Array with Object замінює масив з індексованими даними на об'єкт з іменованими властивостями, що забезпечує:
+* Самодокументованість - назви властивостей пояснюють їх призначення;
+* Безпеку - неможливо помилитися з іменами властивостей (IDE підкаже помилку);
+* Гнучкість - легко додавати, видаляти або переставляти поля.
+
+
+3.2.2 Код до рефакторингу 
+        Оформлення програмного коду до рефакторингу Replace Array with Object можна побачити в Додаток В.1.
+3.2.3 Пояснення обраного методу 
+У нашому коді дані користувача зберігаються в масиві з числовими індексами, де кожен елемент має своє призначення: перший елемент - ім'я, другий - прізвище, третій - email тощо. Це неправильне використання масиву, оскільки масиви в JavaScript призначені для однорідних колекцій даних, таких як список товарів або масив чисел. Наші дані є структурою з різними полями, кожне з яких має своє унікальне призначення, і ми не виконуємо типові операції з масивами. 
+Об'єкти в JavaScript створені саме для представлення сутностей та зберігання структурованих даних з іменованими властивостями. Метод Replace Array with Object точно відповідає природі наших даних - ми описуємо сутність "користувач" з фіксованим набором полів, де порядок цих полів не має значення для бізнес-логіки. Також ми можемо застосувати деструктуризацію об'єктів для витягування даних з req.body, використати shorthand syntax для створення об'єкта та spread operator для передачі даних у методи ORM. Все це робить код більш виразним і компактним.
+Метод покращує читабельність коду миттєво. Порівняймо: при хешуванні паролю bcrypt.hash(userData[3], 10) змушує нас згадувати, що третій індекс це пароль, а bcrypt.hash(userData.password, 10) говорить сам за себе.
+
+
+3.2.4 Переваги отриманого коду після застосування методу
+        
+        Після рефакторингу коду ми отримуємо програмний код, який можна побачити в Додаток В.2.
+Застосування методу Replace Array with Object змінив код з незрозумілого набору індексів у структуру даних. Тепер кожне звернення до даних користувача є зрозумілим.
+
+
+        Переваги:
+* Код є самодокументованим та добре читається і не потребує коментарів для пояснення;
+* userData.email замість userData[2] - одразу зрозуміло призначення поля;
+* Перевірка валідації !first_name || !last_name зрозуміліша за !userData[0] || !userData[1];
+* Неможливо випадково переплутати поля (email замість password);
+* Зміна порядку властивостей не впливає на роботу коду;
+* Додавання нового поля (наприклад, phone_number) не вимагає перенумерації індексів;
+* Видалення поля не ламає решту коду;
+* Використання можливостей JavaScript(Деструктуризація, Shorthand syntax, Spread operator).
+
+
+3.3 Метод Replace Exception with Test
+3.3.1 Опис проблеми 
+
+
+У початковій версії коду функції додавання оцінки до рецепту використовується підхід з обробкою винятків для перевірки валідності даних та унікальності оцінки.
+Проблеми цього підходу:
+* Використання винятків для контролю нормальної бізнес-логіки є антипатерном;
+* Винятки є ресурсоємними операціями;
+* Код стає менш зрозумілим через нагромадження блоків try/catch;
+
+
+3.3.2 Код до рефакторингу 
+Оформлення програмного коду до рефакторингу Replace Exception with Test можна побачити в Додаток В.3.
+3.3.3 Пояснення обраного методу 
+
+
+Метод Replace Exception with Test замінює використання винятків для керування звичайною логікою програми на прості перевірки умов. Замість того, щоб спочатку виконувати дію й потім ловити помилку, ми перевіряємо, чи можна виконати цю дію заздалегідь.
+У нашому випадку, замість:
+* викидання винятку під час перевірки валідності оцінки;
+* спроби створення запису й обробки помилки унікальності;
+* обробки винятку, коли рецепт не знайдено;
+
+ми використовуємо звичайні перевірки. Це дозволяє:
+   * уникнути непотрібних винятків у нормальних ситуаціях;
+   * зробити код простішим і зрозумілішим;
+   * краще контролювати бізнес-логіку через явні умови;
+
+
+3.3.4 Переваги отриманого коду після застосування методу
+
+
+Після рефакторингу коду ми отримуємо програмний код, який можна побачити в Додаток В.4.
+
+
+Переваги
+   * Уникнуто непотрібних запитів до бази даних при виявленні конфліктів на ранніх етапах
+   * Спрощено ланцюжок обробки помилок, що прискорило виконання успішних сценаріїв
+   * Код тепер має лінійну структуру з чіткими умовними перевірками замість вкладених блоків try/catch
+   * Умовні конструкції if (!recipe) та if (existingRating) однозначно описують бізнес-логіку
+   * Видалено антипатерн використання винятків для керування звичайною логікою програми.
+________________
+
+
+3.4 Метод Replace Nested Conditional with Guard Clauses
+3.4.1 Опис проблеми 
+
+
+У початковій версії коду функції додавання рецепту до улюблених використовуються глибоко вкладені умовні конструкції. Код містить чотири рівні вкладеності: перевірка автентифікації користувача, перевірка наявності recipe_id, перевірка існування рецепту в базі даних, та перевірка чи рецепт вже не доданий до улюблених.
+Проблеми цього підходу:
+   * Важко відстежувати логіку через множинні рівні вкладеності
+   * Основна бізнес-логіка "захована" всередині останньої умови
+   * Доводиться тримати в голові всі умови одночасно для розуміння коду
+   * При додаванні нової перевірки потрібно створювати ще один рівень вкладеності
+   * Важко знайти відповідні блоки else для кожного if
+   * Незрозуміло, де закінчується одна перевірка і починається інша
+   * Важко побачити всі можливі шляхи виконання функції
+Метод рефакторингу Replace Nested Conditional with Guard Clauses замінює вкладені умови на послідовність перевірок на початку функції, що забезпечує:
+   * Всі перевірки на одному рівні
+   * Ранній вихід з функції при виявленні помилки
+   * Зосередження основної логіки в кінці функції без вкладеності
+
+
+3.4.2 Код до рефакторингу 
+        Оформлення програмного коду до рефакторингу Replace Nested Conditional with Guard Clauses можна побачити в Додаток В.5.
+3.4.3 Пояснення обраного методу 
+
+
+У нашому коді функція додавання рецепту до улюблених містить чотири послідовні перевірки, кожна з яких створює новий рівень вкладеності. Ця структура ускладнює читання коду, оскільки основна бізнес-логіка створення запису у таблиці Favorites знаходиться всередині четвертого рівня вкладеності. Ми повинні прочитати весь код і відстежити всі умови, щоб зрозуміти, що відбувається у випадку успішного виконання.
+Метод Replace Nested Conditional with Guard Clauses вирішує цю проблему шляхом переміщення всіх перевірок на початок функції. Замість перевірки позитивних умов та вкладення коду всередину блоків if, ми перевіряємо негативні умови та негайно виходимо з функції при їх виявленні.
+Метод покращує читабельність коду миттєво. Замість чотирьох вкладених if-блоків з else-гілками, ми отримуємо лінійну послідовність перевірок, де кожна займає 3-4 рядки.  Основна логіка створення запису await Favorites.create({ user_id, recipe_id }) тепер знаходиться в кінці функції на нульовому рівні вкладеності, що робить її очевидною та легкою для знаходження.
+
+
+3.4.4 Переваги отриманого коду після застосування методу
+
+
+Після рефакторингу коду ми отримуємо програмний код, який можна побачити в Додаток В.6.
+Застосування методу Replace Nested Conditional with Guard Clauses змінило код з глибоко вкладеної структури в лінійну послідовність перевірок. Тепер кожна умова знаходиться на одному рівні вкладеності, а основна бізнес-логіка чітко видна в кінці функції.
+Переваги:
+   * Код читається зверху вниз як послідовність кроків;
+   * Не потрібно відстежувати множинні рівні вкладеності;
+   * Основна логіка знаходиться в кінці без вкладень;
+   * Кожна перевірка займає 3-4 рядки та легко сприймається;
+   * Всі guard clauses на одному рівні - не потрібно тримати в голові стек умов;
+   * Одразу зрозуміло, які перевірки виконуються та в якому порядку;
+   * Додавання нової перевірки не вимагає створення нового рівня вкладеності.
+
+
+3.5 Інструменти для рефакторингу
+
+
+Для рефакторингу коду в екосистемі Node.js часто використовують ESLint, який аналізує код і пропонує способи автоматичного виправлення стилістичних та логічних помилок. Також ефективним середовищем є Visual Studio Code або WebStorm, що має вбудовані можливості для рефакторингу — перейменування змінних і функцій, виділення коду в окремі методи, автоматичне виправлення імпортів і форматування. Додатково, через розширення VS Code, можна інтегрувати ESLint, Prettier та інші утиліти, які допомагають підтримувати чистоту, узгодженість і якість коду під час рефакторингу.
+________________
+4 ВИСНОВКИ
+
+
+Рефакторинг є невід’ємною частиною процесу розробки програмного забезпечення, оскільки дозволяє підтримувати код у чистому, зрозумілому стані без зміни його функціональності. Регулярне застосування методів рефакторингу підвищує якість коду, зменшує кількість помилок, полегшує розширення проєкту та командну роботу.
+Методи рефакторингу, такі як Replace Array with Object, Replace Exception with Test та Replace Nested Conditional with Guard Clauses, спрямовані на підвищення читабельності, зменшення складності логіки та уникнення антипатернів у коді.
+Застосовувати рефакторинг слід у таких випадках:
+   * після додавання нового функціоналу, щоб усунути дублювання або надмірну складність;
+   * перед оптимізацією чи масштабуванням коду;
+   * під час коду-рев’ю, коли виявлено ділянки з поганою структурою;
+   * у процесі підтримки проєкту, коли код стає важким для розуміння.
+
+
+
+
+________________
+
+
+
+
+5 ВИКОРИСТАНІ ДЖЕРЕЛА
+
+
+1 Replace Array with Object. Refactoring and Design Patterns. URL: https://refactoring.guru/replace-array-with-object (дата звернення: 09.11.2025).
+2 Replace Exception with Test. Refactoring and Design Patterns. URL: https://refactoring.guru/replace-exception-with-test (дата звернення: 09.11.2025).
+3 Replace Nested Conditional with Guard Clauses. Refactoring and Design Patterns. URL: https://refactoring.guru/replace-nested-conditional-with-guard-clauses (дата звернення: 09.11.2025).
+________________
+
+
+
+
+ДОДАТОК А
+Відеозапис
+
+
+Відеозапис доповіді: https://youtu.be/W-cWNx568ko
+Хронологічний опис відеозапису:
+00:00 - 00:17 - Привітання
+00:17 - 00:59 - Вступ
+00:59 - 02:00 - Приклад до рефакторингу Replace Array with Object
+02:00 - 02:59 - Приклад після рефакторингу Replace Array with Object
+02:59 - 03:55 - Приклад до рефакторингу Replace Exception with Test
+03:55 - 04:31 - Приклад після рефакторингу Replace Exception with Test
+04:31 - 05:29 - Приклад до рефакторингу Replace Nested Conditional with Guard Clauses
+05:29 - 06:25 - Приклад після рефакторингу Replace Nested Conditional with Guard Clauses
+06:25 - 07:02 - Інструменти для рефакторингу
+07:02 - 07:57 - Висновки
+07:57 - 08:03 - Використанні джерела
+
+
+________________
+
+
+ДОДАТОК Б
+Слайди презентації
+
+
+  
+
+Рисунок Б.1 - Титульний слайд
+
+
+  
+
+Рисунок Б.2 - Вступна частина
+  
+
+Рисунок Б.3 - Приклад коду до рефакторингу Replace Array with Object
+
+
+  
+
+Рисунок Б.4 - Приклад коду після рефакторингу Replace Array with Object
+  
+
+Рисунок Б.5 - Приклад коду до рефакторингу Replace Exception with Test
+
+
+  
+
+Рисунок Б.6 - Приклад коду після рефакторингу Replace Exception with Test
+  
+
+Рисунок Б.7 - Приклад коду до рефакторингу Replace Nested Conditional with Guard Clauses
+
+
+  
+
+Рисунок Б.8 - Приклад коду після рефакторингу Replace Nested Conditional with Guard Clauses
+  
+
+Рисунок Б.9 - Інструменти для рефакторингу
+
+
+  
+
+Рисунок Б.10 - Висновки
+  
+
+Рисунок Б.11 - Використанні джерела
+
+
+________________
+
+
+ДОДАТОК В
+Програмний код
+
+
+В.1 Приклад оформлення програмного коду до рефакторингу Replace Array with Object 
+
+
+GitHub репозиторій: https://github.com/NureKhudiienkoMykyta/ark-pzpi-23-8-khudiienko-mykyta/blob/main/Pract2/Replace%20Array%20with%20Object/before.js
+
+
+  1 export const register = async (req, res) => {
+  2   try {
+  3     // Створюємо масив з даними користувача
+  4     // [0] - first_name, [1] - last_name, [2] - email,
+  5     // [3] - password, [4] - auth_provider
+  6     const userData = [
+  7       req.body.first_name,
+  8       req.body.last_name,
+  9       req.body.email,
+ 10       req.body.password,
+ 11       "local",
+ 12     ];
+ 13
+ 14     if (!userData[0] || !userData[1] || !userData[2] || !userData[3]) {
+ 15       return res.status(422).json({ message: "Fields are required" });
+ 16     }
+ 17
+ 18     const isAdmin = userData[2] === process.env.ADMIN_EMAIL;
+ 19
+ 20     const existUser = await User.findOne({ where: { email: userData[2] } });
+ 21
+ 22     if (existUser || isAdmin) {
+ 23       return res.status(409).json({ message: "User already exists" });
+ 24     }
+ 25
+ 26     const hashPassword = await bcrypt.hash(userData[3], 10);
+ 27
+ 28     userData[3] = hashPassword;
+ 29
+ 30     const newUser = await User.create({
+ 31       first_name: userData[0],
+ 32       last_name: userData[1],
+ 33       email: userData[2],
+ 34       password: userData[3],
+ 35       auth_provider: userData[4],
+ 36     });
+ 37
+ 38     const token = generateToken(newUser.user_id);
+ 39
+ 40     res.status(201).json({
+ 41       user: {
+ 42         user_id: newUser.user_id,
+ 43         first_name: userData[0],
+ 44         last_name: userData[1],
+ 45         email: userData[2],
+ 46         avatar: newUser.avatar,
+ 47         about_user: newUser.about_user,
+ 48         role: "user",
+ 49       },
+ 50       token,
+ 51     });
+ 52   } catch (error) {
+ 53     console.error(error);
+ 54     res.status(500).json({
+ 55       message: "Server error. Error register " + error.message,
+ 56     });
+ 57   }
+ 58 };
+
+
+
+
+В.2 Приклад оформлення програмного коду після рефакторингу Replace Array with Object 
+
+
+GitHub репозиторій: https://github.com/NureKhudiienkoMykyta/ark-pzpi-23-8-khudiienko-mykyta/blob/main/Pract2/Replace%20Array%20with%20Object/after.js
+
+
+  1 export const register = async (req, res) => {
+  2   try {
+  3     const { first_name, last_name, email, password } = req.body;
+  4
+  5     if (!first_name || !last_name || !email || !password) {
+  6       return res.status(422).json({ message: "Fields are required" });
+  7     }
+  8
+  9     const userData = {
+ 10       first_name,
+ 11       last_name,
+ 12       email,
+ 13       password,
+ 14       auth_provider: "local",
+ 15     };
+ 16
+ 17     const isAdmin = userData.email === process.env.ADMIN_EMAIL;
+ 18
+ 19     const existUser = await User.findOne({ where: { email: userData.email } });
+ 20
+ 21     if (existUser || isAdmin) {
+ 22       return res.status(409).json({ message: "User already exists" });
+ 23     }
+ 24
+ 25     const hashPassword = await bcrypt.hash(userData.password, 10);
+ 26
+ 27     userData.password = hashPassword;
+ 28
+ 29     const newUser = await User.create({
+ 30       ...userData,
+ 31     });
+ 32
+ 33     const token = generateToken(newUser.user_id);
+ 34
+ 35     res.status(201).json({
+ 36       user: {
+ 37         user_id: newUser.user_id,
+ 38         first_name: userData.first_name,
+ 39         last_name: userData.last_name,
+ 40         email: userData.email,
+ 41         avatar: newUser.avatar,
+ 42         about_user: newUser.about_user,
+ 43         role: "user",
+ 44       },
+ 45       token,
+ 46     });
+ 47   } catch (error) {
+ 48     console.error(error);
+ 49     res.status(500).json({
+ 50       message: "Server error. Error register " + error.message,
+ 51     });
+ 52   }
+ 53 };
+
+
+В.3 Приклад оформлення програмного коду до рефакторингу Replace Exception with Test
+
+
+GitHub репозиторій: https://github.com/NureKhudiienkoMykyta/ark-pzpi-23-8-khudiienko-mykyta/blob/main/Pract2/Replace%20Exception%20with%20Test/before.js
+
+
+  1 export const addRating = async (req, res) => {
+  2   try {
+  3     const { recipe_id, rating } = req.body;
+  4     const user_id = req.user.user_id;
+  5
+  6     if (rating < 1 || rating > 5) {
+  7       throw new Error("INVALID_RATING_VALUE");
+  8     }
+  9
+ 10     const newRating = await Rating.create({
+ 11       user_id: user_id,
+ 12       recipe_id: recipe_id,
+ 13       rating: rating,
+ 14     });
+ 15
+ 16     const recipeRatings = await Rating.findAll({
+ 17       where: { recipe_id: recipe_id },
+ 18       attributes: ["rating"],
+ 19     });
+ 20
+ 21     const total = recipeRatings.reduce((sum, r) => sum + r.rating, 0);
+ 22     const average_rating = total / recipeRatings.length;
+ 23
+ 24     const recipe = await Recipe.findByPk(recipe_id, {
+ 25       attributes: ["recipe_id", "title", "image_url"],
+ 26     });
+ 27
+ 28     res.status(201).json({
+ 29       message: "Оцінку успішно додано",
+ 30       rating: {
+ 31         rating_id: newRating.rating_id,
+ 32         rating: newRating.rating,
+ 33         created_at: newRating.createdAt,
+ 34       },
+ 35       recipe: {
+ 36         recipe_id: recipe.recipe_id,
+ 37         title: recipe.title,
+ 38         image_url: recipe.image_url,
+ 39         average_rating: average_rating,
+ 40         total_ratings: recipeRatings.length,
+ 41       },
+ 42     });
+ 43   } catch (error) {
+ 44     if (error.message === "INVALID_RATING_VALUE") {
+ 45       res.status(400).json({
+ 46         error: "Оцінка повинна бути в діапазоні від 1 до 5",
+ 47       });
+ 48     } else if (error.name === "SequelizeUniqueConstraintError") {
+ 49       res.status(400).json({
+ 50         error: "Ви вже оцінили цей рецепт",
+ 51       });
+ 52     } else if (error.name === "SequelizeForeignKeyConstraintError") {
+ 53       res.status(404).json({
+ 54         error: "Рецепт не знайдено",
+ 55       });
+ 56     } else {
+ 57       console.error("Помилка додавання оцінки:", error);
+ 58       res.status(500).json({
+ 59         error: "Внутрішня помилка сервера",
+ 60       });
+ 61     }
+ 62   }
+ 63 };
+
+
+
+
+В.4 Приклад оформлення програмного коду після рефакторингу Replace Exception with Test
+
+
+GitHub репозиторій: https://github.com/NureKhudiienkoMykyta/ark-pzpi-23-8-khudiienko-mykyta/blob/main/Pract2/Replace%20Exception%20with%20Test/after.js
+
+
+  1 export const addRating = async (req, res) => {
+  2   const { recipe_id, rating } = req.body;
+  3   const user_id = req.user.user_id;
+  4
+  5   if (rating < 1 || rating > 5) {
+  6     return res.status(400).json({
+  7       error: "Оцінка повинна бути в діапазоні від 1 до 5",
+  8     });
+  9   }
+ 10
+ 11   const recipe = await Recipe.findByPk(recipe_id, {
+ 12     attributes: ["recipe_id", "title", "image_url"],
+ 13   });
+ 14
+ 15   if (!recipe) {
+ 16     return res.status(404).json({
+ 17       error: "Рецепт не знайдено",
+ 18     });
+ 19   }
+ 20
+ 21   const existingRating = await Rating.findOne({
+ 22     where: {
+ 23       user_id: user_id,
+ 24       recipe_id: recipe_id,
+ 25     },
+ 26   });
+ 27
+ 28   if (existingRating) {
+ 29     return res.status(400).json({
+ 30       error: "Ви вже оцінили цей рецепт",
+ 31       existing_rating: {
+ 32         rating_id: existingRating.rating_id,
+ 33         rating: existingRating.rating,
+ 34       },
+ 35     });
+ 36   }
+ 37
+ 38   try {
+ 39     const newRating = await Rating.create({
+ 40       user_id: user_id,
+ 41       recipe_id: recipe_id,
+ 42       rating: rating,
+ 43     });
+ 44
+ 45     const recipeRatings = await Rating.findAll({
+ 46       where: { recipe_id: recipe_id },
+ 47       attributes: ["rating"],
+ 48     });
+ 49
+ 50     const total = recipeRatings.reduce((sum, r) => sum + r.rating, 0);
+ 51     const average_rating = Math.round((total / recipeRatings.length) * 10) / 10;
+ 52
+ 53     res.status(201).json({
+ 54       message: "Оцінку успішно додано",
+ 55       rating: {
+ 56         rating_id: newRating.rating_id,
+ 57         rating: newRating.rating,
+ 58         created_at: newRating.createdAt,
+ 59       },
+ 60       recipe: {
+ 61         recipe_id: recipe.recipe_id,
+ 62         title: recipe.title,
+ 63         image_url: recipe.image_url,
+ 64         average_rating: average_rating,
+ 65         total_ratings: recipeRatings.length,
+ 66       },
+ 67     });
+ 68   } catch (error) {
+ 69     console.error("Неперевірена помилка при додаванні оцінки:", error);
+ 70     res.status(500).json({
+ 71       error: "Внутрішня помилка сервера",
+ 72     });
+ 73   }
+ 74 };
+
+
+
+
+
+
+В.5 Приклад оформлення програмного коду до рефакторингу Replace Nested Conditional with Guard Clauses
+
+
+GitHub репозиторій: https://github.com/NureKhudiienkoMykyta/ark-pzpi-23-8-khudiienko-mykyta/blob/main/Pract2/Replace%20Nested%20Conditional%20with%20Guard%20Clauses/before.js
+
+
+  1 export const addToFavorites = async (req, res) => {
+  2   try {
+  3     const { recipe_id } = req.body;
+  4     const user_id = req.user.id;
+  5
+  6     if (user_id) {
+  7       if (recipe_id) {
+  8         const recipe = await Recipe.findByPk(recipe_id);
+  9
+ 10         if (recipe) {
+ 11           const existingFavorite = await Favorites.findOne({
+ 12             where: { user_id, recipe_id },
+ 13           });
+ 14
+ 15           if (!existingFavorite) {
+ 16             const favorite = await Favorites.create({ user_id, recipe_id });
+ 17             return res.status(201).json({ message: "Added to favorites" });
+ 18           } else {
+ 19             return res.status(409).json({
+ 20               message: "Already in favorites",
+ 21             });
+ 22           }
+ 23         } else {
+ 24           return res.status(404).json({
+ 25             message: "Recipe not found",
+ 26           });
+ 27         }
+ 28       } else {
+ 29         return res.status(400).json({
+ 30           message: "Recipe ID is required",
+ 31         });
+ 32       }
+ 33     } else {
+ 34       return res.status(401).json({
+ 35         message: "User not authenticated",
+ 36       });
+ 37     }
+ 38   } catch (error) {
+ 39     res.status(500).json({ message: "Server error: " + error.message });
+ 40   }
+ 41 };
+
+
+
+
+В.6 Приклад оформлення програмного коду після рефакторингу Replace Nested Conditional with Guard Clauses
+
+
+GitHub репозиторій: https://github.com/NureKhudiienkoMykyta/ark-pzpi-23-8-khudiienko-mykyta/blob/main/Pract2/Replace%20Nested%20Conditional%20with%20Guard%20Clauses/after.js
+
+
+  1 export const addToFavorites = async (req, res) => {
+  2   try {
+  3     const { recipe_id } = req.body;
+  4     const user_id = req.user.id;
+  5
+  6     if (!user_id) {
+  7       return res.status(401).json({
+  8         message: "User not authenticated",
+  9       });
+ 10     }
+ 11
+ 12     if (!recipe_id) {
+ 13       return res.status(400).json({
+ 14         message: "Recipe ID is required",
+ 15       });
+ 16     }
+ 17
+ 18     const recipe = await Recipe.findByPk(recipe_id);
+ 19
+ 20     if (!recipe) {
+ 21       return res.status(404).json({
+ 22         message: "Recipe not found",
+ 23       });
+ 24     }
+ 25
+ 26     const existingFavorite = await Favorites.findOne({
+ 27       where: { user_id, recipe_id },
+ 28     });
+ 29
+ 30     if (existingFavorite) {
+ 31       return res.status(409).json({
+ 32         message: "Already in favorites",
+ 33       });
+ 34     }
+ 35
+ 36     await Favorites.create({ user_id, recipe_id });
+ 37     res.status(201).json({ message: "Added to favorites" });
+ 38   } catch (error) {
+ 39     res.status(500).json({ message: "Server error: " + error.message });
+ 40   }
+ 41 };
