@@ -14,7 +14,7 @@
 ЗВІТ
 до практичного завдання № 2
 з дисципліни «Аналіз та рефакторинг коду»
-на тему: «Методи рефакторинґу програмного коду Replace Array with Object, Encapsulate Field, Replace Nested Conditional with Guard Clauses на прикладі Node.js»
+на тему: «Методи рефакторинґу програмного коду Replace Array with Object, Replace Exception with Test, Replace Nested Conditional with Guard Clauses на прикладі Node.js»
 
 
 
